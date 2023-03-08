@@ -1,0 +1,31 @@
+select 
+SPLR_ACCT_NAM,
+MCK_ITM_NUM,
+NDC_NUM,
+SELL_DSCR,
+DC_NUM,
+DC_LOC,
+LOC_RGN_DSCR,
+replace(oh_qty,' ','')
+BTCH_PROC_DT,
+LOAD_DATE,
+vw_MediSpanFlatVw.Generic_Product_Packaging_Code
+
+from vw_McKesson_DailyInventory_History
+join vw_MediSpanFlatVw on vw_McKesson_DailyInventory_History.NDC_NUM = vw_MediSpanFlatVw.NDC_UPC_HRI
+where load_date >= '2023-01-01'
+and LOAD_DATE <= '2023-02-14'
+
+
+group by
+SPLR_ACCT_NAM,
+MCK_ITM_NUM,
+NDC_NUM,
+SELL_DSCR,
+DC_NUM,
+DC_LOC,
+LOC_RGN_DSCR,
+OH_QTY,
+BTCH_PROC_DT,
+LOAD_DATE,
+vw_MediSpanFlatVw.Generic_Product_Packaging_Code

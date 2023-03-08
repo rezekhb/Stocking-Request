@@ -1,0 +1,75 @@
+SELECT
+                    
+pdf.[NDC]
+,Cust_acct
+,Acct_name
+,Ship_to_addr
+,Ship_to_city
+,Ship_to_state
+,Ship_to_ZIP
+,Item
+,Generic_Product_Packaging_Code
+,ms.GPI_10_Name
+,ms.GPI_14_Name
+,ms.Generic_Product_Identifier
+,loadYearMonth
+,pdf.[Desc] AS ProductDescription
+, SUM(pdf.[Sale_Qty]) AS PurchaseQty
+,sum(pdf.sale_amt) AS Spend,
+Case
+when ms.PkgDesc in 
+('Vial',
+'Syringe',
+'Flex Cont',
+'Ampule',
+'Plas Cont',
+'Cup',
+'Glass Cont',
+'Inhaler',
+'Cartridge',
+'Crtrdg-NDL',
+'Bag',
+'Tube',
+'Pen')
+then (ms.Package_Quantity)*Sale_qty
+ELSE (ms.Package_Quantity *ms.Package_Size)*Sale_qty
+End as TotalPillsQTY,
+Dc,
+Dc_name
+
+
+FROM [TRGDataMart].[dbo].[vw_Pharmacy_Data_File] [pdf]
+LEFT JOIN [TRGDataMart].[dbo].[vw_MediSpanFlatVw] [ms]
+     ON [ms].[NDC_UPC_HRI] = [pdf].[UnCleansedNDC]
+
+WHERE pdf.[Supplier] = 'McKesson'
+AND ISNULL(pdf.[UnCleansedNDC], pdf.[NDC]) <> '00000000000'
+and Sale_qty <> '0.00'
+AND PDF.[Desc] <> 'CUSTOMER HANDLING CHARGES'
+AND PDF.[Desc] <> 'CREDIT/DEB MCK UNSALEA RETURNS'
+AND PDF.[Desc] <> 'THIRD PARTY DEBITS CREDITS'
+AND PDF.INVOICEDATETIME BETWEEN '2023-01-01' AND '2023-02-14'
+
+and Sale_qty > '0'
+
+GROUP BY
+pdf.[NDC]
+,pdf.[Desc] 
+,Cust_acct
+,Acct_name
+,Ship_to_addr
+,Ship_to_city
+,Ship_to_state
+,Ship_to_ZIP
+,Item
+,Package_Quantity
+,Package_Size
+,Generic_Product_Packaging_Code
+,ms.GPI_10_Name
+,ms.GPI_14_Name
+,loadYearmonth
+,Sale_qty
+,Dc
+,Dc_name
+,ms.Generic_Product_Identifier
+,ms.PkgDesc
